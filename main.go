@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"httpserver/config"
+	"httpserver/internal/database"
 	"httpserver/internal/handlers"
 	"httpserver/internal/middleware"
 	"httpserver/internal/router"
@@ -21,13 +22,36 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
+
+	fileLog, err := openLogFile(cfg.Logging.File)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	infoLog := log.New(fileLog, "[info]", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
+	errorLog := log.New(fileLog, "[error]", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
+	infoLog.Println("this is info")
+	errorLog.Println("this is error")
+	if err := database.InitDB(cfg); err != nil {
+		log.Printf("Error initializing database: %v", err)
+	} else if database.IsDBConnected() {
+		defer database.CloseDB()
+		log.Println("Database connection established")
+	} else {
+		log.Println("No database configuration provided, running without database")
+	}
+
 	r := router.NewRouter()
 
 	r.AddRoute("GET", "/", middleware.Logging(handlers.GetRoot))
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
-		Handler: r,
+		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
+		Handler:      r,
+		ReadTimeout:  cfg.Server.ReadTimeout,
+		WriteTimeout: cfg.Server.WriteTimeout,
+		IdleTimeout:  cfg.Server.IdleTimeout,
 	}
 	go func() {
 		log.Printf("Starting server on %s", server.Addr)
@@ -46,4 +70,12 @@ func main() {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 	log.Println("Server exiting")
+}
+
+func openLogFile(path string) (*os.File, error) {
+	logFile, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return nil, err
+	}
+	return logFile, nil
 }

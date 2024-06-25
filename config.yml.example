@@ -1,3 +1,18 @@
 server:
   host: "127.0.0.1"
   port: 3333
+  read-timeout: 15
+  write-timeout: 15
+  idle-timeout: 15
+
+logging:
+  level: "info"
+  file: "server.log"
+
+database: 
+  driver: "postgres" # or sql server
+  connection-string: "host=localhost port=5432 user=sa password=password dbname=databasename sslmode=disable"
+
+api:
+  version: "v1"
+  rate-limit: 100

@@ -1,0 +1,8 @@
+2024/06/24 23:50:54.423164 main.go:33: log file created
+2024/06/24 23:50:54.432026 main.go:38: Database connection established
+2024/06/24 23:50:54.432223 main.go:55: Starting server on 127.0.0.1:3333
+2024/06/24 23:50:56.524418 logging.go:17: [GET] / 127.0.0.1:40694 0 0.07ms
+2024/06/24 23:50:59.943429 main.go:63: Shutting down server
+2024/06/24 23:50:59.943694 main.go:70: Server exiting
+[info]2024/06/24 23:53:52.122100 main.go:34: this is info
+[error]2024/06/24 23:53:52.122233 main.go:35: this is error
