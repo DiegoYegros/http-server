@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 )
@@ -73,6 +74,11 @@ func main() {
 }
 
 func openLogFile(path string) (*os.File, error) {
+	logDir := filepath.Dir(path)
+	err := os.MkdirAll(logDir, 0755)
+	if err != nil {
+		return nil, err
+	}
 	logFile, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
