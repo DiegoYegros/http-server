@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
+	"httpserver/config"
 	"httpserver/internal/handlers"
 	"httpserver/internal/middleware"
 	"httpserver/internal/router"
@@ -15,13 +17,16 @@ import (
 )
 
 func main() {
-
+	cfg, err := config.LoadConfig("config.yml")
+	if err != nil {
+		log.Fatalf("Error loading config: %v", err)
+	}
 	r := router.NewRouter()
 
 	r.AddRoute("GET", "/", middleware.Logging(handlers.GetRoot))
 
 	server := &http.Server{
-		Addr:    "127.0.0.1:3333",
+		Addr:    fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
 		Handler: r,
 	}
 	go func() {
